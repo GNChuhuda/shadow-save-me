@@ -19,7 +19,7 @@ npm install
 npm run dev
 ```
 
-Vite 启动后会在终端显示本地地址，通常是 `http://localhost:5173/`。
+Vite 启动后会在终端显示本地地址，通常是 `http://localhost:5173/shadow-save-me/`。
 
 ## 验证命令
 
