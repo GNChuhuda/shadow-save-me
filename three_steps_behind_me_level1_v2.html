@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c1426" />
+  <title>三步后的我 · 第一关：回声狭门（升级版）</title>
+  <style>
+    :root { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif; color-scheme: dark; --bg:#0b1324; --panel:#15223a; --line:#30415d; --txt:#eaf1ff; --dim:#9aaac2; --purple:#b7a1ff; --gold:#ffc46b; --a:#75e5d0; --b:#ff9eaa; }
+    * { box-sizing:border-box; }
+    html,body {margin:0;min-height:100%;background: radial-gradient(circle at 24% 5%,#1b2c4d 0,transparent 40%),radial-gradient(circle at 90% 85%,#272247 0,transparent 36%),var(--bg);}
+    body {padding:24px 16px 40px;}
+    .app {max-width:1070px;margin:auto;}
+    .topline {display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+    .eyebrow {font-size:12px;font-weight:800;letter-spacing:.17em;color:#a7b9dc;text-transform:uppercase}
+    .version {font-size:12px;color:#7187a9;border:1px solid #31415c;border-radius:20px;padding:5px 10px}
+    h1 {font-size:clamp(26px,4vw,42px);letter-spacing:.03em;line-height:1.25;margin:8px 0;}
+    h1 span {color:#b9aaff}
+    .desc {color:var(--dim);font-size:14px;line-height:1.7;margin:0 0 22px}
+    .main {display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px, .8fr);gap:18px;align-items:start}
+    .panel {background:linear-gradient(145deg,#15223a,#111c32);border:1px solid #354766;border-radius:18px;box-shadow:0 15px 45px #03091555;}
+    .gamepanel {padding:20px 18px 17px;}
+    .hud {display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    .pill {border:1px solid #435471;background:#202d47;padding:8px 11px;border-radius:100px;font-size:12px;color:#d9e6ff}
+    .pill b {font-size:14px;color:#fff}
+    .pill.open {border-color:#2f8b77;color:#90f5d2;background:#123c37}
+    .board-wrap {position:relative;max-width:630px;margin:0 auto;}
+    .board {display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:4px;padding:9px;border-radius:13px;background:#0a1426;border:1px solid #34445f;aspect-ratio:11/7;}
+    .tile {position:relative;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;border-radius:5px;background:#22334d;border:1px solid #2d4260;overflow:hidden}
+    .tile.wall {background:repeating-linear-gradient(125deg,#111b2b 0,#111b2b 8px,#19263b 8px,#19263b 16px);border-color:#1d2b40;}
+    .tile.switch-a {background:#124f50;border:2px solid #64e0cc;box-shadow:inset 0 0 16px #34f1c233;}
+    .tile.switch-b {background:#643646;border:2px solid #fca0b1;box-shadow:inset 0 0 16px #fca0b122;}
+    .tile.echo-gate {background:repeating-linear-gradient(90deg,#3f2c59 0,#3f2c59 7px,#513b6c 7px,#513b6c 14px);border:2px solid #a891db;box-shadow:inset 0 0 15px #aa80ed33}
+    .tile.echo-gate.ready {background:#1b5d58;border-color:#70f4da;box-shadow:inset 0 0 20px #50ffdf55,0 0 12px #50ffdf50}
+    .tile.door {background:repeating-linear-gradient(0deg,#453727,#453727 6px,#635135 6px,#635135 12px);border:2px solid #d5a65b;}
+    .tile.door.opened {background:#1e584e;border-color:#55dfb7;box-shadow:inset 0 0 16px #26d4b466}
+    .tile.exit {background:#1c4f4a;border:2px solid #74e5c6;box-shadow:inset 0 0 18px #45e6ab55}
+    .tile-label {position:absolute;top:2px;left:4px;font-size:clamp(8px,1vw,11px);font-weight:900;line-height:1;color:#ecfff8;opacity:.9}
+    .tile.switch-b .tile-label {color:#ffe5e9}
+    .symbol {font-size:clamp(11px,2vw,21px);color:#ffe4ae;opacity:.72;line-height:1}
+    .tile.exit .symbol {color:#a9ffe6}
+    .tile.echo-gate .symbol {color:#e5c7ff}
+    .tile.echo-gate.ready .symbol {color:#9cffdf}
+    .actor {position:absolute;width:55%;height:55%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:clamp(10px,1.5vw,16px);z-index:4;animation:pop .18s ease-out;user-select:none}
+    .actor.player {background:#ffbc55;color:#3c270a;border:2px solid #ffe3a3;box-shadow:0 0 17px #f0a737a0;}
+    .actor.ghost {background:#9e92efcc;color:#251e45;border:2px solid #cfc4ff;box-shadow:0 0 17px #9b7af977;}
+    .actor.both.player {transform:translate(23%,-15%);width:46%;height:46%}
+    .actor.both.ghost {transform:translate(-24%,18%);width:46%;height:46%}
+    .preview {position:absolute;width:72%;height:72%;border:2px dashed #b9a6ff;border-radius:50%;opacity:.8;z-index:2;pointer-events:none}
+    @keyframes pop {from {scale:.78;opacity:.4} to {scale:1;opacity:1}}
+    .win-overlay {position:absolute;inset:0;border-radius:13px;background:#091b2edc;display:none;z-index:10;align-items:center;justify-content:center;text-align:center;padding:18px}
+    .win-overlay.show {display:flex;}
+    .win-card {background:#21344f;border:1px solid #4eaa91;border-radius:15px;padding:24px 25px;max-width:330px;box-shadow:0 20px 55px #0008}
+    .win-card h2 {color:#a1f5d8;margin:0 0 8px;font-size:25px}
+    .win-card p {line-height:1.7;color:#c3d3e6;font-size:14px}
+    .feedback {font-size:13px;color:#c0d1ea;line-height:1.65;min-height:45px;margin:13px 0 10px;padding:9px 12px;border:1px solid #32435f;background:#17263d;border-radius:9px}
+    .feedback.success {color:#9cf0d1;border-color:#297d6e;background:#133c39}
+    .control-row {display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}
+    button {font:inherit;cursor:pointer;border:1px solid #516485;border-radius:10px;background:#253956;color:#ecf2ff;padding:11px 15px;font-size:13px;font-weight:750;transition:transform .12s,background .12s;touch-action:manipulation}
+    button:hover {background:#324c71}
+    button:active {transform:scale(.96)}
+    button:focus-visible {outline:3px solid #a5b5fc;outline-offset:3px}
+    button:disabled {opacity:.34;cursor:not-allowed}
+    button.primary {background:#705dd6;border-color:#9e8df4;color:white}
+    button.primary:hover {background:#806fe3}
+    .instructions {padding:22px 20px}
+    .instructions h2 {font-size:18px;margin:0 0 16px}
+    .step {display:flex;gap:10px;align-items:flex-start;margin:15px 0;line-height:1.65;font-size:13px;color:#c3d3e8}
+    .num {display:grid;place-items:center;flex:0 0 25px;height:25px;border-radius:50%;background:#374866;color:#d8e8ff;font-weight:850}
+    .legend {display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:17px 0}
+    .legend div {display:flex;align-items:center;gap:7px;font-size:12px;color:#c2d1e7}
+    .dot {width:13px;height:13px;border-radius:50%;display:inline-block;flex:0 0 13px}
+    .dot.player {background:var(--gold)} .dot.ghost {background:var(--purple)} .dot.a {background:var(--a)} .dot.b {background:var(--b)}
+    .keyboard {border-top:1px solid #364965;margin-top:18px;padding-top:17px}
+    .keyboard h3 {font-size:13px;margin:0 0 8px;color:#e7f0ff}
+    .keyboard p {font-size:12px;line-height:1.7;color:#96acc8;margin:0}
+    .dpad {display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,45px);gap:6px;justify-content:center;margin:13px auto 0;user-select:none}
+    .dpad button {padding:0;font-size:20px;background:#304464}
+    .dpad .up {grid-column:2;grid-row:1}.dpad .left {grid-column:1;grid-row:2}.dpad .wait {grid-column:2;grid-row:2;font-size:12px;background:#554877}.dpad .right {grid-column:3;grid-row:2}.dpad .down {grid-column:2;grid-row:3}
+    .small {font-size:12px;color:#879cba;line-height:1.6}
+    .timeline {margin-top:13px;background:#111d32;padding:12px;border-radius:11px;border:1px solid #32435d}
+    .timeline-title {font-size:12px;color:#a5b9d5;font-weight:800;margin-bottom:9px}
+    .timecells {display:flex;align-items:center;gap:5px}
+    .timecell {flex:1;min-width:0;text-align:center;background:#263653;border:1px solid #354969;border-radius:7px;padding:8px 3px;font-size:11px;color:#b2c5e2}
+    .timecell.live {background:#664c36;border-color:#c29152;color:#fff1cf}
+    .timecell.ghostcell {background:#4a4376;border-color:#a79bff;color:#e4dbff}
+    .timecells .arr {color:#849ab9;font-size:12px}
+    .hint {margin-top:13px;border-left:3px solid #9b88e8;padding:8px 11px;background:#241f3d;border-radius:0 8px 8px 0;font-size:13px;line-height:1.65;color:#e8ddff;display:none}
+    .hint.show {display:block}
+    @media(max-width:800px) {.main {grid-template-columns:1fr}.instructions{padding:18px}.gamepanel{padding:15px 12px}.board{gap:3px;padding:6px}.tile{border-radius:3px}.desc{font-size:13px}}
+    @media(prefers-reduced-motion:reduce) {*{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topline"><span class="eyebrow">ECHO / PUZZLE 01 · V2</span><span class="version">升级版 · 单文件 HTML</span></div>
+    <h1>三步后的<span>我</span></h1>
+    <p class="desc">一条看似笔直的路，却被过去的自己挡住。只有绕一小段路，才能让三步前的影子替你打开回声门。</p>
+    <div class="main">
+      <section class="panel gamepanel" aria-label="游戏区域">
+        <div class="hud"><span class="pill">关卡 <b>01</b> · 回声狭门</span><span class="pill">步数 <b id="turn">0</b></span><span class="pill" id="echo-label">⌛ 回声门未就绪</span><span class="pill" id="gate-label">🔒 出口门未开启</span></div>
+        <div class="board-wrap">
+          <div id="board" class="board" role="img" aria-label="11列7行迷宫棋盘"></div>
+          <div id="win-overlay" class="win-overlay" aria-live="polite"><div class="win-card"><h2>✦ 时间同步成功！</h2><p>你主动绕了一个小圈，才让过去的自己赶上正确时机。<br/>第一关已完成，用了 <strong id="final-turns">0</strong> 步。</p><button class="primary" id="win-restart">再玩一次 ↺</button></div></div>
+        </div>
+        <p class="feedback" id="feedback" aria-live="polite">直接从 A 冲向 B 行不通：途中有一道回声门。想办法让影子在你进入回声门的那一拍踩上 A。</p>
+        <div class="timeline"><div class="timeline-title">时间轨迹 · 每走一步，影子执行 3 步前的站位</div><div class="timecells"><div class="timecell ghostcell" id="ghost-state">影子：未出现</div><span class="arr">→</span><div class="timecell live" id="player-state">现在：(1,1)</div><span class="arr">→</span><div class="timecell" id="next-ghost">下一拍影子：—</div></div></div>
+        <div class="control-row"><button id="undo" disabled>↶ 撤销上一步</button><button id="reset">⟲ 重新开始</button><button id="hint">💡 提示</button></div>
+        <div class="hint" id="hint-text"></div>
+        <div class="dpad" aria-label="触控方向键"><button class="up" data-dir="up" aria-label="上">↑</button><button class="left" data-dir="left" aria-label="左">←</button><button class="wait" disabled title="本关不可等待，必须利用空间绕路">禁等</button><button class="right" data-dir="right" aria-label="右">→</button><button class="down" data-dir="down" aria-label="下">↓</button></div>
+        <p class="small" style="text-align:center;margin:6px 0 0">键盘方向键 / WASD 移动 · Z 撤销 · R 重开 · 本关不可原地等待</p>
+      </section>
+      <aside class="panel instructions">
+        <h2>第一关：回声狭门</h2>
+        <div class="step"><span class="num">1</span><span>每移动一步，影子就会重演你<b>三步前的位置</b>。它不能被直接控制。</span></div>
+        <div class="step"><span class="num">2</span><span><b style="color:#e3d8ff">回声门 G</b>只有在你进入它的那一拍，影子刚好踩在 <b style="color:#9debdc">A</b> 才能穿过。本关<b>不允许原地等待</b>，需要绕路对齐时间。</span></div>
+        <div class="step"><span class="num">3</span><span>穿过 G 后，还要让影子站在 <b style="color:#9debdc">A</b>，你同时抵达 <b style="color:#ffbfca">B</b>，才会永久打开右侧的出口门 D。随后到达<b>出口 ✦</b>。</span></div>
+        <div class="legend"><div><i class="dot player"></i>当前的你</div><div><i class="dot ghost"></i>过去的你</div><div><i class="dot a"></i>影子开关 A</div><div><i class="dot b"></i>玩家开关 B</div></div>
+        <div class="keyboard"><h3>一个重要细节</h3><p>“三步”是行动步数，不是三秒。你可以无限思考，但本关时间只会在<b>真正走了一格</b>后前进。直接冲门会失败；撞墙不会消耗步数。棋盘上的紫色虚线圈表示影子下一步将出现的位置。</p></div>
+        <p class="small" style="margin-top:15px">小目标：尝试找到最短路线。求解器验证过，本关存在 11 步通关的路径。</p>
+      </aside>
+    </div>
+  </main>
+  <script>
+    'use strict';
+    // 这关采用 11×7 网格，两条竖墙分别只有一个通道 G、D。
+    // G 为即时回声门：当前行动完成的瞬间，影子恰好在 A 才允许进入。
+    // D 为永久出口门：当影子在 A 且玩家在 B 时开启。
+    const MAP = [
+      '###########',
+      '#S.#..#...#',
+      '#..#..#...#',
+      '#.AG.BD.E.#',
+      '#..#..#...#',
+      '#..#..#...#',
+      '###########'
+    ];
+    const start = {x:1,y:1};
+    const a = {x:2,y:3};
+    const b = {x:5,y:3};
+    const exit = {x:8,y:3};
+    const dirs = {up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+    let path = [{...start}], unlockedAt = null, won = false, hintLevel = 0;
+    const el = (id)=>document.getElementById(id);
+    const equal = (p,q)=>p && q && p.x===q.x && p.y===q.y;
+    const turn = ()=>path.length-1;
+    const player = ()=>path[path.length-1];
+    const ghost = ()=>turn()>=3 ? path[turn()-3] : null;
+    // 在玩家的下一次有效移动完成后，影子将移动到这里。
+    const nextGhost = ()=>turn()>=2 ? path[turn()-2] : null;
+    const nextEchoReady = ()=>equal(nextGhost(),a);
+    const gateOpen = ()=>unlockedAt!==null;
+    function updateStatus(message, success=false) {
+      el('feedback').textContent=message;
+      el('feedback').className='feedback'+(success?' success':'');
+    }
+    function draw() {
+      el('turn').textContent=String(turn());
+      const gate=el('gate-label');
+      gate.textContent=gateOpen()?'✓ 出口门已解锁':'🔒 出口门未开启';
+      gate.className='pill'+(gateOpen()?' open':'');
+      const echoLabel=el('echo-label');
+      echoLabel.textContent=nextEchoReady()?'✦ 下一步可穿过回声门':'⌛ 回声门等待影子';
+      echoLabel.className='pill'+(nextEchoReady()?' open':'');
+      el('undo').disabled=turn()===0 || won;
+      el('ghost-state').textContent=ghost()?`影子：(${ghost().x},${ghost().y})`:'影子：尚未出现';
+      el('player-state').textContent=`现在：(${player().x},${player().y})`;
+      el('next-ghost').textContent=nextGhost()?`下一拍影子：(${nextGhost().x},${nextGhost().y})`:'下一拍影子：未出现';
+      const preview=nextGhost();
+      const board=el('board');
+      board.replaceChildren();
+      MAP.forEach((line,y)=>{
+        [...line].forEach((cell,x)=>{
+          const tile=document.createElement('div');
+          let klass='tile';
+          if(cell==='#')klass+=' wall';
+          if(cell==='A')klass+=' switch-a';
+          if(cell==='B')klass+=' switch-b';
+          if(cell==='G')klass+=' echo-gate'+(nextEchoReady()?' ready':'');
+          if(cell==='D')klass+=' door'+(gateOpen()?' opened':'');
+          if(cell==='E')klass+=' exit';
+          tile.className=klass;
+          if(cell==='A' || cell==='B'){
+            const tag=document.createElement('span');tag.className='tile-label';tag.textContent=cell;tile.append(tag);
+          }
+          if(cell==='G' || cell==='D' || cell==='E'){
+            const symbol=document.createElement('span');symbol.className='symbol';symbol.textContent=cell==='G'?(nextEchoReady()?'◈':'⌛'):cell==='D'?(gateOpen()?'◈':'▥'):'✦';tile.append(symbol);
+          }
+          const here={x,y};
+          if(preview && equal(preview,here) && !equal(ghost(),here)) {
+            const ring=document.createElement('div');ring.className='preview';ring.title='下回合影子会到这里';tile.append(ring);
+          }
+          const both=equal(player(),here)&&equal(ghost(),here);
+          if(equal(ghost(),here)){const fig=document.createElement('div');fig.className='actor ghost'+(both?' both':'');fig.textContent='影';tile.append(fig);}
+          if(equal(player(),here)){const fig=document.createElement('div');fig.className='actor player'+(both?' both':'');fig.textContent='我';tile.append(fig);}
+          board.append(tile);
+        });
+      });
+      el('win-overlay').classList.toggle('show',won);
+      if(won)el('final-turns').textContent=String(turn());
+    }
+    function move(dir) {
+      if(won || !(dir in dirs))return;
+      const [dx,dy]=dirs[dir], p=player(), next={x:p.x+dx,y:p.y+dy};
+      const terrain=MAP[next.y]?.[next.x];
+      if(!terrain || terrain==='#') {
+        updateStatus('前面是墙壁。换一条路线，想想怎样用空间绕路来调整影子的时间。');
+        return;
+      }
+      // 同步结算：此次迈入回声门的那一瞬间，影子进入 A 才算开门。
+      if(terrain==='G' && !nextEchoReady()) {
+        updateStatus('⌛ 回声门没有开启！你下一步移动后，影子必须恰好踩在 A 才能通过。回头观察一下左边的岔路。');
+        return;
+      }
+      if(terrain==='D' && !gateOpen()) {
+        updateStatus('出口门还锁着：只有影子在 A、你站在 B 的同一回合，它才会永久开启。');
+        return;
+      }
+      path.push(next);
+      if(!gateOpen() && equal(ghost(),a) && equal(player(),b)) {
+        unlockedAt=turn();
+        updateStatus('✦ 双线同步成功！影子在 A，你在 B，出口门 D 已永久解锁！',true);
+      } else if(equal(player(),exit) && gateOpen()) {
+        won=true;
+        updateStatus(`通关！共走了 ${turn()} 步。你成功用绕路控制了过去自己的到达时机。`,true);
+      } else if(terrain==='G') {
+        updateStatus('✦ 成功穿过回声门！这时影子正踩在 A。接下来要让自己在恰当的时刻抵达 B。',true);
+      } else if(turn()===3) {
+        updateStatus('影子出现了！紫色虚线圈是影子下一步的位置。它每一拍都在复现你三步前的站位。');
+      } else if(equal(player(),a)) {
+        updateStatus('你站到了 A。直接向右冲门时，影子不一定已到 A；试试通过走动来让两条时间线对齐。');
+      } else if(equal(player(),b) && !equal(ghost(),a)) {
+        updateStatus('你在 B，但影子没在 A。需要让两个位置在同一回合满足条件。');
+      } else {
+        updateStatus(`第 ${turn()} 步：${nextEchoReady()?'提示：下一步影子将踩住 A，回声门可以通过。':'请留意影子的下一步位置，提前设计空间路线。'}`);
+      }
+      draw();
+    }
+    function undo() {
+      if(turn()===0 || won)return;
+      path.pop();
+      if(unlockedAt!==null && turn()<unlockedAt)unlockedAt=null;
+      updateStatus('已撤销一步。观察紫色的下一拍预览，重新规划当前行动。');
+      draw();
+    }
+    function reset() {
+      path=[{...start}];unlockedAt=null;won=false;hintLevel=0;
+      el('hint-text').classList.remove('show');
+      el('hint').textContent='💡 提示';
+      updateStatus('直接从 A 冲向 B 行不通：途中有一道回声门。想办法让影子在你进入回声门的那一拍踩上 A。');
+      draw();
+    }
+    const hints=[
+      '提示 1 / 3：要进 G，影子必须刚好在那一回合踩住 A。直接从 A 向右走，时间对不上。',
+      '提示 2 / 3：本关不能原地等待。到达 A 后，不妨先走到旁边一格，再回到 A，然后尝试进 G。',
+      '提示 3 / 3：一条 11 步的完整路线：↓ ↓ → ↑ ↓ → → → → → →。其中到 A 之后的“↑ ↓”就是关键空间绕路。'
+    ];
+    document.querySelectorAll('[data-dir]').forEach(button=>button.addEventListener('click',()=>move(button.dataset.dir)));
+    el('undo').addEventListener('click',undo);
+    el('reset').addEventListener('click',reset);
+    el('win-restart').addEventListener('click',reset);
+    el('hint').addEventListener('click',()=>{
+      hintLevel=Math.min(3,hintLevel+1);
+      el('hint-text').textContent=hints[hintLevel-1];
+      el('hint-text').classList.add('show');
+      el('hint').textContent=hintLevel===3?'已显示完整提示':'💡 下一条提示';
+    });
+    document.addEventListener('keydown',(event)=>{
+      const key=event.key.toLowerCase();
+      const mapping={arrowup:'up',w:'up',arrowdown:'down',s:'down',arrowleft:'left',a:'left',arrowright:'right',d:'right'};
+      if(mapping[key]){event.preventDefault();move(mapping[key]);return;}
+      if(key===' '){event.preventDefault();updateStatus('本关不能原地等待。时间只在移动时前进，你可以绕路来调整影子到达 A 的时机。');}
+      if(key==='z'){event.preventDefault();undo();}
+      if(key==='r'){event.preventDefault();reset();}
+    });
+    draw();
+  </script>
+</body>
+</html>
