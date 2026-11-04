@@ -4,6 +4,12 @@
 
 当前开发轮次只包含第一关“回声狭门”，没有添加第二关或新机制。原始文件 `three_steps_behind_me_level1_v2.html` 保留为行为与视觉回归基准。
 
+## 在线游玩
+
+[打开 GitHub Pages 在线版本](https://gnchuhuda.github.io/shadow-save-me/)
+
+每次向 `main` 分支推送通过测试的版本后，GitHub Actions 会自动测试、构建并更新在线游戏。
+
 ## 本地运行
 
 需要 Node.js 20.19+ 或 22.12+。
