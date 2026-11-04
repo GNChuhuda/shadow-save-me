@@ -35,8 +35,8 @@ describe('第一关：回声狭门', () => {
     expect(passed.moved).toBe(true);
     expect(passed.event).toBe('echo-gate-passed');
     expect(getTurn(passed.state)).toBe(6);
-    expect(pointsEqual(getGhost(passed.state, level01), level01.positions.ghostSwitch)).toBe(true);
-    expect(pointsEqual(getPlayer(passed.state), level01.positions.echoGate)).toBe(true);
+    expect(pointsEqual(getGhost(passed.state, level01), level01.positions.markers.A)).toBe(true);
+    expect(pointsEqual(getPlayer(passed.state), level01.positions.markers.G)).toBe(true);
   });
 
   it('影子在 A 且玩家在 B 的同一回合永久解锁 D', () => {
@@ -48,8 +48,8 @@ describe('第一关：回声狭门', () => {
     const atB = step(beforeB, 'right', level01);
     expect(atB.event).toBe('door-unlocked');
     expect(atB.state.doorUnlockedAt).toBe(8);
-    expect(pointsEqual(getGhost(atB.state, level01), level01.positions.ghostSwitch)).toBe(true);
-    expect(pointsEqual(getPlayer(atB.state), level01.positions.playerSwitch)).toBe(true);
+    expect(pointsEqual(getGhost(atB.state, level01), level01.positions.markers.A)).toBe(true);
+    expect(pointsEqual(getPlayer(atB.state), level01.positions.markers.B)).toBe(true);
 
     const afterLeavingB = step(atB.state, 'right', level01).state;
     expect(afterLeavingB.doorUnlockedAt).toBe(8);

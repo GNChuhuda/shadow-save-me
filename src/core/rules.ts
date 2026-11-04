@@ -1,9 +1,12 @@
-import type { LevelDefinition } from '../levels/schema';
+import type { InstantGateConfig, LevelDefinition } from '../levels/schema';
 import type { GameState, Point } from './types';
 
 export type BlockReason = 'wall' | 'echo-gate' | 'exit-door' | null;
 
-export function pointsEqual(left: Point | null, right: Point | null): boolean {
+export function pointsEqual(
+  left: Point | null | undefined,
+  right: Point | null | undefined,
+): boolean {
   return Boolean(left && right && left.x === right.x && left.y === right.y);
 }
 
@@ -29,8 +32,26 @@ export function getTile(level: LevelDefinition, point: Point): string | undefine
   return level.map[point.y]?.[point.x];
 }
 
-export function isEchoGateReady(state: GameState, level: LevelDefinition): boolean {
-  return pointsEqual(getNextGhost(state, level), level.positions.ghostSwitch);
+export function getInstantGate(
+  level: LevelDefinition,
+  tile: string,
+): InstantGateConfig | undefined {
+  return level.mechanics.instantGates.find((gate) => gate.tile === tile);
+}
+
+export function isInstantGateReady(
+  state: GameState,
+  level: LevelDefinition,
+  gateTile: string,
+): boolean {
+  const gate = getInstantGate(level, gateTile);
+  return Boolean(
+    gate &&
+      pointsEqual(
+        getNextGhost(state, level),
+        level.positions.markers[gate.ghostSwitch],
+      ),
+  );
 }
 
 export function isExitDoorOpen(state: GameState): boolean {
@@ -45,10 +66,13 @@ export function getBlockReason(
   const tile = getTile(level, destination);
 
   if (!tile || tile === '#') return 'wall';
-  if (tile === level.mechanics.echoGate.tile && !isEchoGateReady(state, level)) {
+  if (getInstantGate(level, tile) && !isInstantGateReady(state, level, tile)) {
     return 'echo-gate';
   }
-  if (tile === level.mechanics.exitDoor.tile && !isExitDoorOpen(state)) {
+  if (
+    tile === level.mechanics.persistentDoor?.tile &&
+    !isExitDoorOpen(state)
+  ) {
     return 'exit-door';
   }
 
@@ -59,8 +83,11 @@ export function shouldUnlockExitDoor(
   state: GameState,
   level: LevelDefinition,
 ): boolean {
+  const door = level.mechanics.persistentDoor;
+  if (!door) return false;
+
   return (
-    pointsEqual(getGhost(state, level), level.positions.ghostSwitch) &&
-    pointsEqual(getPlayer(state), level.positions.playerSwitch)
+    pointsEqual(getGhost(state, level), level.positions.markers[door.ghostSwitch]) &&
+    pointsEqual(getPlayer(state), level.positions.markers[door.playerSwitch])
   );
 }

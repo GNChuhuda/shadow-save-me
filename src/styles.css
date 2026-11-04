@@ -10,6 +10,7 @@
   --gold: #ffc46b;
   --a: #75e5d0;
   --b: #ff9eaa;
+  --c: #7eb8ff;
 }
 
 * { box-sizing: border-box; }
@@ -47,13 +48,16 @@ h1 span { color: #b9aaff; }
 .tile.wall { background: repeating-linear-gradient(125deg, #111b2b 0, #111b2b 8px, #19263b 8px, #19263b 16px); border-color: #1d2b40; }
 .tile.switch-a { background: #124f50; border: 2px solid #64e0cc; box-shadow: inset 0 0 16px #34f1c233; }
 .tile.switch-b { background: #643646; border: 2px solid #fca0b1; box-shadow: inset 0 0 16px #fca0b122; }
+.tile.switch-c { background: #1f4772; border: 2px solid #7eb8ff; box-shadow: inset 0 0 16px #559fff33; }
 .tile.echo-gate { background: repeating-linear-gradient(90deg, #3f2c59 0, #3f2c59 7px, #513b6c 7px, #513b6c 14px); border: 2px solid #a891db; box-shadow: inset 0 0 15px #aa80ed33; }
+.tile.gate-h { background: repeating-linear-gradient(90deg, #243f66 0, #243f66 7px, #31517e 7px, #31517e 14px); border-color: #78aaf2; }
 .tile.echo-gate.ready { background: #1b5d58; border-color: #70f4da; box-shadow: inset 0 0 20px #50ffdf55, 0 0 12px #50ffdf50; }
 .tile.door { background: repeating-linear-gradient(0deg, #453727 0, #453727 6px, #635135 6px, #635135 12px); border: 2px solid #d5a65b; }
 .tile.door.opened { background: #1e584e; border-color: #55dfb7; box-shadow: inset 0 0 16px #26d4b466; }
 .tile.exit { background: #1c4f4a; border: 2px solid #74e5c6; box-shadow: inset 0 0 18px #45e6ab55; }
 .tile-label { position: absolute; top: 2px; left: 4px; font-size: clamp(8px, 1vw, 11px); font-weight: 900; line-height: 1; color: #ecfff8; opacity: .9; }
 .tile.switch-b .tile-label { color: #ffe5e9; }
+.tile.switch-c .tile-label { color: #e0edff; }
 .symbol { font-size: clamp(11px, 2vw, 21px); color: #ffe4ae; opacity: .72; line-height: 1; }
 .tile.exit .symbol { color: #a9ffe6; }
 .tile.echo-gate .symbol { color: #e5c7ff; }
@@ -93,6 +97,7 @@ button.primary:hover { background: #806fe3; }
 .dot.ghost { background: var(--purple); }
 .dot.a { background: var(--a); }
 .dot.b { background: var(--b); }
+.dot.c { background: var(--c); }
 .keyboard { border-top: 1px solid #364965; margin-top: 18px; padding-top: 17px; }
 .keyboard h3 { font-size: 13px; margin: 0 0 8px; color: #e7f0ff; }
 .keyboard p { font-size: 12px; line-height: 1.7; color: #96acc8; margin: 0; }
@@ -118,6 +123,8 @@ button.primary:hover { background: #806fe3; }
 .echo-text { color: #e3d8ff; }
 .a-text { color: #9debdc; }
 .b-text { color: #ffbfca; }
+.c-text { color: #9cc9ff; }
+.h-text { color: #9cc9ff; }
 
 .menu-card { max-width: 680px; margin: clamp(70px, 13vh, 140px) auto 0; padding: clamp(28px, 6vw, 58px); text-align: center; position: relative; overflow: hidden; }
 .menu-card::after { content: "影"; position: absolute; right: -18px; bottom: -72px; font-size: 210px; font-weight: 950; color: #9e92ef0d; pointer-events: none; }

@@ -2,6 +2,7 @@ import type { LevelDefinition } from '../levels/schema';
 import {
   getBlockReason,
   getGhost,
+  getInstantGate,
   getPlayer,
   getTile,
   getTurn,
@@ -47,13 +48,22 @@ export function step(
     return { state, moved: false, event: 'wall-blocked' };
   }
   if (blockReason === 'echo-gate') {
-    return { state, moved: false, event: 'echo-gate-blocked' };
+    const gate = getInstantGate(level, getTile(level, destination) ?? '');
+    return {
+      state,
+      moved: false,
+      event: 'echo-gate-blocked',
+      ...(gate
+        ? { gate: { tile: gate.tile, ghostSwitch: gate.ghostSwitch } }
+        : {}),
+    };
   }
   if (blockReason === 'exit-door') {
     return { state, moved: false, event: 'exit-door-blocked' };
   }
 
   const tile = getTile(level, destination);
+  const instantGate = tile ? getInstantGate(level, tile) : undefined;
   let nextState: GameState = {
     ...state,
     path: [...state.path, destination],
@@ -68,7 +78,7 @@ export function step(
 
   if (
     tile === level.mechanics.exit.tile &&
-    nextState.doorUnlockedAt !== null
+    (!level.mechanics.persistentDoor || nextState.doorUnlockedAt !== null)
   ) {
     nextState = { ...nextState, won: true };
     return { state: nextState, moved: true, event: 'won' };
@@ -77,18 +87,33 @@ export function step(
   if (nextState.doorUnlockedAt === getTurn(nextState)) {
     return { state: nextState, moved: true, event: 'door-unlocked' };
   }
-  if (tile === level.mechanics.echoGate.tile) {
-    return { state: nextState, moved: true, event: 'echo-gate-passed' };
+  if (instantGate) {
+    return {
+      state: nextState,
+      moved: true,
+      event: 'echo-gate-passed',
+      gate: {
+        tile: instantGate.tile,
+        ghostSwitch: instantGate.ghostSwitch,
+      },
+    };
   }
   if (getTurn(nextState) === level.delay) {
     return { state: nextState, moved: true, event: 'ghost-appeared' };
   }
-  if (pointsEqual(getPlayer(nextState), level.positions.ghostSwitch)) {
+  if (pointsEqual(getPlayer(nextState), level.positions.markers.A)) {
     return { state: nextState, moved: true, event: 'standing-on-a' };
   }
   if (
-    pointsEqual(getPlayer(nextState), level.positions.playerSwitch) &&
-    !pointsEqual(getGhost(nextState, level), level.positions.ghostSwitch)
+    level.mechanics.persistentDoor &&
+    pointsEqual(
+      getPlayer(nextState),
+      level.positions.markers[level.mechanics.persistentDoor.playerSwitch],
+    ) &&
+    !pointsEqual(
+      getGhost(nextState, level),
+      level.positions.markers[level.mechanics.persistentDoor.ghostSwitch],
+    )
   ) {
     return { state: nextState, moved: true, event: 'standing-on-b-without-ghost' };
   }

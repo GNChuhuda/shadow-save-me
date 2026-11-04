@@ -29,4 +29,8 @@ export interface StepResult {
   readonly state: GameState;
   readonly moved: boolean;
   readonly event: MoveEvent;
+  readonly gate?: {
+    readonly tile: string;
+    readonly ghostSwitch: string;
+  };
 }

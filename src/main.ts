@@ -70,7 +70,7 @@ function mountLevel(level: LevelDefinition): void {
     const result = step(state, direction, level);
     state = result.state;
     redraw();
-    const feedback = feedbackForEvent(result.event, state, level);
+    const feedback = feedbackForEvent(result, state, level);
     showFeedback(elements, feedback.message, feedback.success);
   };
 
@@ -86,7 +86,7 @@ function mountLevel(level: LevelDefinition): void {
     hintIndex = -1;
     redraw();
     resetHint(elements);
-    showFeedback(elements, initialFeedback());
+    showFeedback(elements, initialFeedback(level));
   };
 
   const revealHint = (): void => {
@@ -95,7 +95,7 @@ function mountLevel(level: LevelDefinition): void {
   };
 
   redraw();
-  showFeedback(elements, initialFeedback());
+  showFeedback(elements, initialFeedback(level));
   removeGameControls = bindGameControls(root, {
     onMove: move,
     onUndo: undoMove,
@@ -104,7 +104,7 @@ function mountLevel(level: LevelDefinition): void {
     onWait: () =>
       showFeedback(
         elements,
-        '本关不能原地等待。时间只在移动时前进，你可以绕路来调整影子到达 A 的时机。',
+        '本关不能原地等待。时间只在移动时前进，请用空间路线调整影子到达开关的时机。',
       ),
     onWinRestart: resetLevel,
   });
