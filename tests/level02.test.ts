@@ -26,9 +26,8 @@ describe('第二关：交错的脚步', () => {
   it('经过上路的 11 步验证路线可以依次穿过 G、H 并通关', () => {
     const beforeG = follow(level02.verifiedRoute.slice(0, 6));
     const atG = step(beforeG, level02.verifiedRoute[6], level02);
-    const beforeH = follow(level02.verifiedRoute.slice(7, 8), atG.state);
-    const atH = step(beforeH, level02.verifiedRoute[8], level02);
-    const completed = follow(level02.verifiedRoute.slice(9), atH.state);
+    const atH = step(atG.state, level02.verifiedRoute[7], level02);
+    const completed = follow(level02.verifiedRoute.slice(8), atH.state);
 
     expect(atG.event).toBe('echo-gate-passed');
     expect(atG.gate).toEqual({ tile: 'G', ghostSwitch: 'A' });
@@ -48,14 +47,23 @@ describe('第二关：交错的脚步', () => {
 
     const atG = step(beforeG, 'down', level02);
     expect(pointsEqual(getGhost(atG.state, level02), level02.positions.markers.A)).toBe(true);
+    expect(isInstantGateReady(atG.state, level02, 'H')).toBe(true);
 
-    const beforeH = step(atG.state, 'right', level02).state;
-    expect(pointsEqual(getGhost(beforeH, level02), level02.positions.markers.C)).toBe(false);
-    expect(isInstantGateReady(beforeH, level02, 'H')).toBe(true);
-
-    const atH = step(beforeH, 'right', level02);
+    const atH = step(atG.state, 'right', level02);
     expect(atH.moved).toBe(true);
     expect(pointsEqual(getGhost(atH.state, level02), level02.positions.markers.C)).toBe(true);
+  });
+
+  it('正确路线会让影子以 A → C 的连续顺序同步玩家的 G → H', () => {
+    const atG = follow(level02.verifiedRoute.slice(0, 7));
+    const atH = step(atG, 'right', level02).state;
+
+    expect(atG.path[4]).toEqual(level02.positions.markers.A);
+    expect(atG.path[5]).toEqual(level02.positions.markers.C);
+    expect(getGhost(atG, level02)).toEqual(level02.positions.markers.A);
+    expect(getGhost(atH, level02)).toEqual(level02.positions.markers.C);
+    expect(getPlayer(atG)).toEqual(level02.positions.markers.G);
+    expect(getPlayer(atH)).toEqual(level02.positions.markers.H);
   });
 
   it('下路可以通过 G，但到 H 时会因历史位置错误而受阻', () => {
@@ -69,21 +77,21 @@ describe('第二关：交错的脚步', () => {
       'up',
     ];
     const atG = follow(wrongLowerRoute);
-    const corridor = step(atG, 'right', level02).state;
-    const blocked = step(corridor, 'right', level02);
+    const blocked = step(atG, 'right', level02);
 
     expect(pointsEqual(getPlayer(atG), level02.positions.markers.G)).toBe(true);
     expect(getTurn(atG)).toBe(7);
+    expect(isInstantGateReady(atG, level02, 'H')).toBe(false);
     expect(blocked.event).toBe('echo-gate-blocked');
     expect(blocked.gate).toEqual({ tile: 'H', ghostSwitch: 'C' });
     expect(blocked.moved).toBe(false);
-    expect(blocked.state).toBe(corridor);
-    expect(getTurn(blocked.state)).toBe(8);
-    expect(blocked.state.path).toBe(corridor.path);
+    expect(blocked.state).toBe(atG);
+    expect(getTurn(blocked.state)).toBe(7);
+    expect(blocked.state.path).toBe(atG.path);
   });
 
   it('H 阻挡反馈明确告知玩家可以撤销或重新开始', () => {
-    const corridor = follow([
+    const atG = follow([
       'down',
       'down',
       'right',
@@ -91,9 +99,8 @@ describe('第二关：交错的脚步', () => {
       'down',
       'right',
       'up',
-      'right',
     ]);
-    const blocked = step(corridor, 'right', level02);
+    const blocked = step(atG, 'right', level02);
     const feedback = feedbackForEvent(blocked, blocked.state, level02);
 
     expect(feedback.message).toContain('撤销');
